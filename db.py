@@ -23,7 +23,8 @@ def init_db():
           CREATE TABLE IF NOT EXISTS users (
               id INTEGER PRIMARY KEY AUTOINCREMENT,
               username TEXT UNIQUE NOT NULL,
-              password_hash TEXT NOT NULL
+              password_hash TEXT NOT NULL,
+              role TEXT DEFAULT user
               )             
         """)
         conn.commit()
@@ -32,13 +33,13 @@ def init_db():
     else:
         print(f'Database already exists at {DB_FILE}')
         
-def add_user(username, password_hash):
+def add_user(username, password_hash, role="user"):
     conn = get_connection()
     cursor = conn.cursor()
     try:
         cursor.execute(
-            """INSERT INTO users (username, password_hash) VALUES (?, ?)""", 
-            (username, password_hash)
+            """INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)""", 
+            (username, password_hash, role)
             )  
         conn.commit()
         return True
@@ -51,7 +52,7 @@ def get_user_by_username(username):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
-        """SELECT id, username, password_hash FROM users WHERE username = ?""",
+        """SELECT id, username, password_hash, role FROM users WHERE username = ?""",
             (username,)
         )  
     user = cursor.fetchone()
